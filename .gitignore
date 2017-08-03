@@ -142,3 +142,4 @@ ENV/
 # Rope project settings
 .ropeproject
 
+/Price Notifier/wishlist.json
