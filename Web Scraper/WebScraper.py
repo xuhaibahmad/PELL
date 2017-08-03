@@ -52,7 +52,7 @@ if len(containers) > 0:
             features = get_features_list(featuresDiv)
             price = priceDiv.span.text
 
-            print(
+            f.write(
                 title.replace(",", "|") + ", " +
                 brand.replace(",", "|") + ", " +
                 description.replace(",", "|") + ", " +
