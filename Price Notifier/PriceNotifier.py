@@ -1,8 +1,7 @@
 import json
-import urllib.parse
-from time import gmtime, strftime
-
 import math
+import re
+import urllib.parse
 import requests
 from bs4 import BeautifulSoup as bSoup
 
@@ -35,14 +34,8 @@ class CZoneScrapper:
         # Find all the item containers
         containers = data.findAll("div", {"class", "product"})
 
-        # Write contents to a csv file
+        # Get item information for each item in container
         if len(containers) > 0:
-            filename = "scrapped_products.csv"
-            f = open(filename, "w")
-            headers = "Title, Brand, Description, Features, Price\n"
-            f.write(headers)
-
-            # Get item information for each item in container
             for product in containers:
                 # Only pick items that are available in stock
                 stock_div = product.find("div", {"class", CZoneScrapper.PRODUCT_STOCK_CLASS_NAME})
@@ -67,18 +60,15 @@ class CZoneScrapper:
                     price = self.extract_price(price_div.span.text)
 
                     if int(price) <= int(product.baseline_price):
-                        print(product.description + " is now available at: " + str(price))
-
-                    f.write(
-                        title.replace(",", "|") + ", " +
-                        brand.replace(",", "|") + ", " +
-                        description.replace(",", "|") + ", " +
-                        features.replace(",", "|") + ", " +
-                        str(price) + "\n"
-                    )
-
-            f.close()
-            print("Items updated at " + strftime("%a, %d %b %Y %X +0000", gmtime()))
+                        print("\"" + title.replace(",", "|") + "\" is now available at: " + str(price))
+                        print("Product Details: ")
+                        print(
+                            title.replace(",", "|") + ", " +
+                            brand.replace(",", "|") + ", " +
+                            description.replace(",", "|") + ", " +
+                            features.replace(",", "|") + ", " +
+                            str(price) + "\n"
+                        )
 
     @staticmethod
     def extract_price(price):
@@ -97,8 +87,8 @@ class CZoneScrapper:
         """
 
         concat_features = ""
-        for i in div.findAll("li", {}):
-            concat_features = i.text + " | " + concat_features
+        for li in div.findAll("li", {}):
+            concat_features = li.text + " | " + concat_features
         concat_features = concat_features[:-3] if concat_features.endswith(
             " | ") else concat_features
         return concat_features if len(concat_features) > 0 else "-"
@@ -107,13 +97,9 @@ class CZoneScrapper:
 class DarazScrapper:
     # Declare URL and class names to picked
     BASE_URL = 'https://www.daraz.pk/catalog/?q={}'
-    PRODUCT_FEATURES_CLASS_NAME = "description highlights text-left"
-    PRODUCT_PRICE_CLASS_NAME = "price"
-    PRODUCT_DESCRIPTION_CLASS_NAME = "description"
-    PRODUCT_TITLE_CLASS_NAME = "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding"
-    PRODUCT_STOCK_CLASS_NAME = "product-stock"
 
-    def search_item(self, product):
+    @staticmethod
+    def search_item(product):
         # Read the page contents and get structured data using beautiful soup
         encoded_url = DarazScrapper.BASE_URL.format(urllib.parse.quote(product.name))
         data = bSoup(requests.get(encoded_url).text, "html.parser")
@@ -127,14 +113,8 @@ class DarazScrapper:
         json_data = json_data.replace(";", "")
         json_data = json.loads(json_data)
 
-        # Write contents to a csv file
+        # Get item information for each item in container
         if len(json_data) > 0:
-            filename = "scrapped_products.csv"
-            f = open(filename, "w")
-            headers = "Title, Brand, Description, Features, Price\n"
-            f.write(headers)
-
-            # Get item information for each item in container
             for x in json_data["products"]:
                 key = json_data["products"][x]
                 title = key["name"]
@@ -144,56 +124,132 @@ class DarazScrapper:
                 price = key["priceLocal"]
 
                 if math.floor(float(price)) <= int(product.baseline_price):
-                    print(product.description + " is now available at: " + str(price))
+                    print("\"" + title.replace(",", "|") + "\" is now available at " + str(price) + " on Daraz")
+                    print("Product Details: ")
+                    print(
+                        title.replace(",", "|") + ", " +
+                        brand.replace(",", "|") + ", " +
+                        description.replace(",", "|") + ", " +
+                        features.replace(",", "|") + ", " +
+                        str(price) + "\n"
+                    )
 
-                f.write(
-                    title.replace(",", "|") + ", " +
-                    brand.replace(",", "|") + ", " +
-                    description.replace(",", "|") + ", " +
-                    features.replace(",", "|") + ", " +
-                    str(price) + "\n"
-                )
 
-            f.close()
-            print("Items updated at " + strftime("%a, %d %b %Y %X +0000", gmtime()))
+class NewEggScrapper:
+    # Declare URL and class names to picked
+    BASE_URL = 'https://www.newegg.com/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description={}' \
+               '&N=-1&isNodeId=1'
+    PRODUCT_FEATURES_CLASS_NAME = "description highlights text-left"
+    PRODUCT_PRICE_CLASS_NAME = "price"
+    PRODUCT_DESCRIPTION_CLASS_NAME = "description"
+    PRODUCT_TITLE_CLASS_NAME = "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding"
+    PRODUCT_STOCK_CLASS_NAME = "product-stock"
 
     @staticmethod
-    def extract_price(price):
-        if price is None:
-            return 0
-        price = str(price).lower().replace("rs.", "", 1)
-        value = [int(s) for s in price.split() if s.isdigit()]
-        price = price if len(value) == 0 else value[0]
+    def search_item(product):
+        # Read the page contents and get structured data using beautiful soup
+        encoded_url = NewEggScrapper.BASE_URL.format(urllib.parse.quote(product.name))
+        data = bSoup(requests.get(encoded_url).text, "html.parser")
+
+        # Find all the item containers
+        containers = data.findAll("div", {"class", "item-info"})
+
+        # Get item information for each item in container
+        if len(containers) > 0:
+            for item in containers:
+                # Only pick items with Free shipping and that are in stock
+                is_in_stock = "out" not in item.find("p", {"class", "item-promo"}).text.lower()
+                is_free_shipping = "free" in item.find("li", {"class", "price-ship"}).text.lower()
+                if is_in_stock and is_free_shipping:
+                    title = item.find("a", {"class", "item-title"}).text
+                    description = "-"
+                    features = "-"
+                    brand = item.div.a.img["title"] if item.div.has_attr("a") else "-"
+                    price = NewEggScrapper.extract_price(item)
+
+                    if math.floor(price) <= int(product.baseline_price):
+                        print("\"" + title.replace(",", "|") + "\" is now available at " + str(price) + " on NewEgg")
+                        print("Product Details: ")
+                        print(
+                            title.replace(",", "|") + ", " +
+                            brand.replace(",", "|") + ", " +
+                            description.replace(",", "|") + ", " +
+                            features.replace(",", "|") + ", " +
+                            str(price) + "\n"
+                        )
+
+    @staticmethod
+    def extract_price(item):
+        price = re.sub(r'[–|-||]', "", item.find("li", {"class", "price-current"}).text).strip()
+        price = re.sub(r'[\xa0].*$', "", price).strip()
+        price = price.replace("$", "")
+        price = float(price) * 100  # Convert USD to PKR since my list has prices in PKR
         return price
 
+
+class AmazonScrapper:
+    # Declare URL and class names to picked
+    BASE_URL = 'https://www.amazon.com/s/ref=nb_sb_noss/134-4639554-0290304?url=search-alias%3Daps&field-keywords={}'
+    PRODUCT_TITLE_CLASS_NAME = "a-link-normal s-access-detail-page s-color-twister-title-link a-text-normal"
+    PRODUCT_BRAND_CLASS_NAME = "a-size-small a-color-secondary"
+    PRODUCT_PRICE_CLASS_NAME = "a-size-base a-color-base"
+    PRODUCT_DESCRIPTION_CLASS_NAME = "a-size-small a-color-secondary"
+
     @staticmethod
-    def parse_features_list(div):
-        """
-        Iterates over the supplied div element and creates pipe-separated string out of each item
-        :return: pipe-separated string from <li/>
-        """
+    def search_item(product):
+        # Read the page contents and get structured data using beautiful soup
+        data = bSoup(requests.get(AmazonScrapper.BASE_URL.format(urllib.parse.quote(product.name))).text, "html.parser")
 
-        concat_features = ""
-        for i in div.findAll("li", {}):
-            concat_features = i.text + " | " + concat_features
-        concat_features = concat_features[:-3] if concat_features.endswith(
-            " | ") else concat_features
-        return concat_features if len(concat_features) > 0 else "-"
+        # Find all the item containers
+        containers = data.findAll("div", {"class", "a-fixed-left-grid-col a-col-right"})
+
+        # Get item information for each item in container
+        if len(containers) > 0:
+            for item in containers:
+                # Only pick items that are available in stock
+                title_div = item.find(
+                    "a", {"class", AmazonScrapper.PRODUCT_TITLE_CLASS_NAME}
+                )
+                price_div = item.find(
+                    "span", {"class", AmazonScrapper.PRODUCT_PRICE_CLASS_NAME}
+                )
+                brand_div = item.findAll(
+                    "span", {"class", AmazonScrapper.PRODUCT_BRAND_CLASS_NAME}
+                )[1]
+
+                title = title_div.text
+                brand = brand_div.text
+                description = "-"
+                features = "-"
+                price = AmazonScrapper.extract_price(price_div)
+
+                if math.floor(price) <= int(product.baseline_price):
+                    print("\"" + title.replace(",", "|") + "\" is now available at " + str(price) + " on Amazon")
+                    print("Product Details: ")
+                    print(
+                        title.replace(",", "|") + ", " +
+                        brand.replace(",", "|") + ", " +
+                        description.replace(",", "|") + ", " +
+                        features.replace(",", "|") + ", " +
+                        str(price) + "\n"
+                    )
+
+    @staticmethod
+    def extract_price(price_div):
+        price = re.sub(r'[–|-||]', "", price_div.text).strip()
+        price = re.sub(r'[\xa0].*$', "", price).strip()
+        price = price.replace("$", "")
+        price = float(price) * 100  # Convert USD to PKR since my list has prices in PKR
+        return price
 
 
-item = {"description": "Sapphire Radeon", "name": "Sapphire Radeon", "baseline_price": "12K"}
-p = Product(item)
-scrapper = DarazScrapper()
-scrapper.search_item(p)
-
-
-
-# import json
 # Read all the items from the wishlist.json
-# with open('wishlist.json') as data_file:
-#     items = json.load(data_file)
-#
-# # Parse JSON into an object with attributes corresponding to dict keys.
-# for i in items["items"]:
-#     p = Product(i)
-#     print(p.product + " | " + p.name + " | " + p.baseline_price)
+with open('wishlist.json') as data_file:
+    items = json.load(data_file)
+
+# Parse JSON into an object with attributes corresponding to dict keys.
+for i in items["items"]:
+    p = Product(i)
+    scrappers = [NewEggScrapper(), DarazScrapper(), CZoneScrapper(), AmazonScrapper()]
+    for scrapper in scrappers:
+       scrapper.search_item(p)
