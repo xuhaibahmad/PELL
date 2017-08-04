@@ -143,3 +143,4 @@ ENV/
 .ropeproject
 
 /Price Notifier/wishlist.json
+/Price Notifier/available_wishlist_products.csv
