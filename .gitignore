@@ -142,5 +142,6 @@ ENV/
 # Rope project settings
 .ropeproject
 
-/Price Notifier/wishlist.json
-/Price Notifier/available_wishlist_products.csv
+/price_notifier/wishlist.json
+/price_notifier/PriceNotifier.bat
+/price_notifier/config.py

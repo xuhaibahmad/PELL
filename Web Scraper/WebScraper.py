@@ -1,6 +1,7 @@
+from time import gmtime, strftime
+
 import requests
 from bs4 import BeautifulSoup as bSoup
-from time import gmtime, strftime
 
 # Declare URL and class names to picked
 URL = 'http://www.czone.com.pk/graphic-cards-pakistan-ppt.154.aspx'
