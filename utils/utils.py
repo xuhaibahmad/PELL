@@ -26,7 +26,7 @@ def write_to_csv(details):
 
 def is_similar(a, b):
     similarity_percent = SequenceMatcher(None, a, b).ratio() * 100
-    return similarity_percent > 45
+    return similarity_percent > config.Constants.SIMILARITY_PERCENT
 
 
 def print_similarity(a, b):

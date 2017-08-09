@@ -24,6 +24,11 @@ class DarazScraper:
         # Extract JSON from extracted script
         json_data = str(containers.text)
         json_data = json_data.split("\n")
+
+        if json_data is None or len(json_data) < 2:
+            print("Invalid JSON in Daraz sraper: " + str(json))
+            return
+
         json_data = json_data[1]
         json_data = json_data.replace("jsTrackingStore.data = ", "")
         json_data = json_data.replace(";", "")

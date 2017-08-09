@@ -1,5 +1,6 @@
 import json
 import time
+import traceback
 
 from Product import Product
 
@@ -25,5 +26,12 @@ scrapers = Constants.MY_SCRAPERS
 for i in items["items"]:
     p = Product(i)
     for scraper in scrapers:
-        scraper.search_item(p)
-        time.sleep(5)
+        if p is not None:
+            try:
+                scraper.search_item(p)
+            except Exception as err:
+                print("Exception in item " + p.description + " in " + str(
+                    scraper.__class__) + " scraper")
+                traceback.print_tb(err.__traceback__)
+                continue
+            time.sleep(5)

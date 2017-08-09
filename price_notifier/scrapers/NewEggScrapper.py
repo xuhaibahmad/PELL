@@ -30,16 +30,19 @@ class NewEggScrapper:
         if len(containers) > 0:
             for item in containers:
                 # Only pick items with Free shipping and that are in stock
-                is_in_stock = "out" not in item.find("p", {"class", "item-promo"}).text.lower()
+                is_in_stock = item is not None and \
+                              item.find("p", {"class", "item-promo"}) and \
+                              "out" not in item.find("p", {"class", "item-promo"}).text.lower()
                 is_free_shipping = "free" in item.find("li", {"class", "price-ship"}).text.lower()
                 if is_in_stock and is_free_shipping:
                     title = item.find("a", {"class", "item-title"}).text
                     brand = item.div.a.img["title"] if item.div.has_attr("a") else "-"
                     price = NewEggScrapper.extract_price(item)
-                    link = "-"
+                    link = item.find("a", {"class", "item-title"})["href"]
 
+                    has_link = link is not None and not "-"
                     is_valid_price = price is not None and price > 0
-                    if is_valid_price and int(price) <= int(product.baseline_price):
+                    if is_valid_price and has_link and int(price) <= int(product.baseline_price):
                         prompt = "\"" + title.replace(",", "|") + "\" is now available in: " + str(
                             price) + " at NewEgg (Baseline: " + product.baseline_price + ")"
                         details = utils.get_details(brand, price, title, link)
@@ -52,6 +55,7 @@ class NewEggScrapper:
     def extract_price(item):
         price = re.sub(r'[\\|–-]', "", item.find("li", {"class", "price-current"}).text).strip()
         price = re.sub(r'[\xa0].*$', "", price).strip()
-        price = price.replace("$", "")
+        price = price.replace("[$|,]", "")
+        price = re.sub(r'[,$]', "", price).strip()
         price = float(price) * 100  # Convert USD to PKR since my list has prices in PKR
         return price

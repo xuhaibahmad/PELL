@@ -45,7 +45,8 @@ class AmazonScraper:
                 price = AmazonScraper.extract_price(price_div)
                 link = title_div["href"]
 
-                if float(product.baseline_price) >= math.floor(float(price)) > 0:
+                has_link = link is not None and not "-"
+                if float(product.baseline_price) >= math.floor(float(price)) > 0 and has_link:
                     prompt = "\"" + title.replace(",", "|") + "\" is now available in " + str(
                         price) + " at Amazon (Baseline: " + product.baseline_price + ")"
                     details = utils.get_details(brand, price, title, link)
@@ -60,6 +61,6 @@ class AmazonScraper:
             return 0
         price = re.sub(r'[\\|–-]', "", price_div.text).strip()
         price = re.sub(r'[\xa0].*$', "", price).strip()
-        price = price.replace("$", "")
+        price = re.sub(r'[$|,]', "", price).strip()
         price = float(price) * 100  # Convert USD to PKR since my list has prices in PKR
         return math.floor(price)
