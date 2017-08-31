@@ -145,4 +145,5 @@ ENV/
 /price_notifier/wishlist.json
 /price_notifier/PriceNotifier.bat
 /price_notifier/config.py
-/Web Scraper/
+/Web Scraper/*
+/.idea/*
