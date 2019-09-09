@@ -149,3 +149,6 @@ ENV/
 /.idea/*
 /movie_recommendations/tmdb_api_key.txt
 /movie_recommendations/config.py
+
+# TTS Audio
+audio.mp3
