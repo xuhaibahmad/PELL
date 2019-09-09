@@ -2,7 +2,7 @@ import random
 from gtts import gTTS
 import speech_recognition as sr
 from pygame import mixer
-from actions.action import Action
+import actions.action as actions
 
 
 def talk(audio):
@@ -32,10 +32,10 @@ def listen_for_commands():
         command = r.recognize_google(audio).lower()
         print('You said: ' + command + '\n')
 
-        action = action_mapper.from_command(command)
+        action = actions.from_command(command)
 
         if action is None:
-            talk("Sorry, I am not familiar with this command")
+            greeting(command)
         else:
             action.execute()
 
@@ -47,16 +47,15 @@ def listen_for_commands():
     return command
 
 
-def pell(command):
+def greeting(command):
     errors = [
         "I don\'t know what you mean!",
         "Excuse me?",
         "Can you repeat it please?",
     ]
 
-    if 'Hello' in command:
+    if 'hello' in command:
         talk('Hello! I am PELL. How can I help you?')
-
     else:
         error = random.choice(errors)
         talk(error)
@@ -64,6 +63,5 @@ def pell(command):
 
 talk('PELL is ready!')
 
-
 while True:
-    pell(listen_for_commands())
+    listen_for_commands()
