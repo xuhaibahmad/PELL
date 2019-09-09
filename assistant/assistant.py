@@ -2,12 +2,13 @@ import random
 from gtts import gTTS
 import speech_recognition as sr
 from pygame import mixer
+from actions.action import Action
 
 
 def talk(audio):
     print(audio)
     for line in audio.splitlines():
-        text_to_speech = gTTS(text=audio, lang='en-uk')
+        text_to_speech = gTTS(text=audio, lang='en-us')
         text_to_speech.save('audio.mp3')
         mixer.init()
         mixer.music.load("audio.mp3")
@@ -30,6 +31,13 @@ def listen_for_commands():
     try:
         command = r.recognize_google(audio).lower()
         print('You said: ' + command + '\n')
+
+        action = action_mapper.from_command(command)
+
+        if action is None:
+            talk("Sorry, I am not familiar with this command")
+        else:
+            action.execute()
 
     # loop back to continue to listen for commands if unrecognizable speech is received
     except sr.UnknownValueError:
