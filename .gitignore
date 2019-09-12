@@ -151,6 +151,10 @@ ENV/
 /movie_recommendations/config.py
 
 # TTS Audio
+bin/
 audio.mp3
+speech.mp3
 
 config.json
+
+.DS_Store
