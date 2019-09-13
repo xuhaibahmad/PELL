@@ -5,6 +5,7 @@ import os
 from const import ROOT_DIR
 import time
 import readtime
+import speech_recognition as sr
 
 AUDIO_PATH = os.path.join(ROOT_DIR, 'bin/audio.mp3')
 SPEECH_PATH = os.path.join(ROOT_DIR, 'bin/speech.mp3')
@@ -18,7 +19,8 @@ def talk(audio):
         mixer.init()
         mixer.music.load(AUDIO_PATH)
         mixer.music.play()
-        time.sleep(3)
+        wait_time = readtime.of_text(audio)
+        time.sleep(wait_time.seconds*2)
 
 
 def read(audio):
@@ -44,7 +46,14 @@ def listen():
         r.adjust_for_ambient_noise(source, duration=1)
         # listens for the user's input
         audio = r.listen(source)
-        return audio
+        try:
+            response = r.recognize_google(audio).lower()
+            print("You said: {}".format(response))
+            return response
+        # loop back to continue to listen for commands if unrecognizable speech is received
+        except sr.UnknownValueError:
+            print('Your last command couldn\'t be heard')
+            listen()
 
 
 def stop_talking():

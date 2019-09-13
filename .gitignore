@@ -156,5 +156,7 @@ audio.mp3
 speech.mp3
 
 config.json
+secrets/
 
 .DS_Store
+pell/.DS_Store/
