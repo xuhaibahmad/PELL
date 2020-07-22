@@ -11,8 +11,9 @@ AUDIO_PATH = os.path.join(ROOT_DIR, 'bin/audio.mp3')
 SPEECH_PATH = os.path.join(ROOT_DIR, 'bin/speech.mp3')
 
 
-def talk(audio):
-    print(audio)
+def talk(audio, prompt=True):
+    if prompt:
+        print(audio)
     for line in audio.splitlines():
         text_to_speech = gTTS(text=audio, lang='en-us')
         text_to_speech.save(AUDIO_PATH)
@@ -23,8 +24,9 @@ def talk(audio):
         time.sleep(wait_time.seconds*2)
 
 
-def read(audio):
-    print(audio)
+def read(audio, prompt=True):
+    if prompt:
+        print(audio)
     text_to_speech = gTTS(text=audio, lang='en-us')
     text_to_speech.save(SPEECH_PATH)
     mixer.init()
