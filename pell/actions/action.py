@@ -6,7 +6,7 @@ from pell.actions.wiki_action import WikiAction
 from pell.actions.youtube_action import YoutubeAction
 from pell.actions.stop_talking_action import StopTalkingAction
 from pell.actions.movie_recommendation_action import MovieRecommendationAction
-
+from pell.actions.book_reading_action import ReadBookAction
 
 def from_command(command):
     if "search for" in command:
@@ -23,5 +23,7 @@ def from_command(command):
         return StopTalkingAction()
     elif "recommend a movie" or "watch" in command:
         return MovieRecommendationAction(command)
+    elif "read" in command:
+        return ReadBookAction(command)
     else:
         return GreetingAction(command)
