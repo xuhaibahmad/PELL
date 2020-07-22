@@ -6,13 +6,15 @@ import functools
 import operator
 import slate3k
 import re
+import time
+
 
 class ReadBookAction:
     def __init__(self, command, book=None):
         self.command = command
         self.book = book
         self.books_dir = os.getenv("books_dir")
-        
+
     def execute(self):
         if self.book == None:
             talk('Which book do you want to listen?')
@@ -24,6 +26,7 @@ class ReadBookAction:
             read_file(self, books[0])
         else:
             talk("Sorry, could not find a book with this title")
+
 
 def read_file(self, file):
     # Convert PDF to Text
@@ -41,7 +44,7 @@ def read_file(self, file):
         for index, page in enumerate(pdf):
             if bool(page and page.strip()):
                 print("Reading Page: {}".format(index))
-                read(page, prompt=False)    
+                read(page, prompt=False)
 
 
 def find_all(name, path):
@@ -49,6 +52,7 @@ def find_all(name, path):
     for _, _, files in os.walk(path):
         result.append([os.path.join(path, f) for f in files if name in f])
     return functools.reduce(operator.iconcat, result, [])
+
 
 if __name__ == "__main__":
     ReadBookAction(
