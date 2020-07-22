@@ -20,22 +20,22 @@ All actions can be found in `pell/actions/` directory. Each actions can be indiv
 
 ## Configurations
 
-Some actions require API keys and user configurations for external resources. Create a `config.json` file to provide sensitive information to the system.
+Some actions require API keys and user configurations for external resources. Create a `.env` file to provide sensitive information to the system.
 
 The current version of PELL supports the following configurations:
 
-```json
-{
-  "test_email": <EMAIL ADDRESS TO SEND TEST EMAILS TO>,
-  "gmail": {
-    "email": <YOUR GMAIL ID>,
-    "password": <YOUR GMAIL PASSWORD>
-  },
-  "movie": {
-    "api_key_filename": <TMDB API KEY>,
-    "email": <YOUR NETFLIX EMAIL>,
-    "password": <YOUR NETFLIX PASSWORD>,
-    "profile": <NETFLIX PROFILE TO USE>
-  }
-}
+```.env
+# Email
+test_email=[EMAIL ADDRESS TO SEND TEST EMAILS TO]
+gmail_email=[YOUR GMAIL ID]
+gmail_password=[YOUR GMAIL PASSWORD]
+
+# Movies
+tmdb_api_key=[Your TMDB API KEY]
+netflix_email=[YOUR NETFLIX EMAIL]
+netflix_password=[YOUR NETFLIX PASSWORD]
+netflix_profile=[NETFLIX PROFILE TO USE]
+
+# Books
+books_dir=[BOOKS DIRECTORY ON YOUR FILESYSTEM]
 ```

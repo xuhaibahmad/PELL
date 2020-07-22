@@ -1,8 +1,8 @@
 from pell.assistant.text_to_speech import talk, listen
-import json
 from const import API_ENDPOINT, URL_GENRES, URL_MOVIES, ROOT_DIR
 import http.client
 from collections import namedtuple
+import json
 import os
 import re
 import bs4
@@ -20,19 +20,10 @@ class MovieRecommendationAction:
         self.command = command
         self.genre = genre
         self.conn = http.client.HTTPSConnection(API_ENDPOINT)
-        with open('config.json') as f:
-            data = json.load(f)
-            movie_config = data["movie"]
-            self.email = movie_config["email"]
-            self.password = movie_config["password"]
-            self.profile = movie_config["profile"]
-            api_key_file = movie_config["api_key_filename"]
-            self.api_key = self.read_api_key(api_key_file)
-
-    def read_api_key(self, filename):
-        path = os.path.join(ROOT_DIR, filename)
-        with open(path) as api_key_file:
-            return api_key_file.read()
+        self.email = os.getenv("netflix_email")
+        self.password = os.getenv("netflix_password")
+        self.profile = os.getenv("netflix_profile")
+        self.api_key = os.getenv("tmdb_api_key")
 
     def execute(self):
         # Ask for genre only if not provided

@@ -1,8 +1,8 @@
 import smtplib
 import time
 from pell.assistant.text_to_speech import talk, listen
-import json
 import sys
+import os
 
 
 class EmailAction:
@@ -12,11 +12,8 @@ class EmailAction:
         self.subject = subject
         self.message = message
         self.receiver = receiver
-        with open('config.json') as f:
-            data = json.load(f)
-            email_data = data["gmail"]
-            self.email = email_data["email"]
-            self.password = email_data["password"]
+        self.email = os.getenv("gmail_email")
+        self.password = os.getenv("gmail_password")
 
     def execute(self):
         # Ask for recepient only when not provided in the command
@@ -53,11 +50,10 @@ class EmailAction:
 
 
 if __name__ == "__main__":
-    with open('config.json') as f:
-        test_email = json.load(f)["test_email"]
-        EmailAction(
-            "Send email to myself",
-            "PELL",
-            "This is a test message from PELL",
-            test_email
-        ).execute()
+    test_email = os.getenv("test_email")
+    EmailAction(
+        "Send email to myself",
+        "PELL",
+        "This is a test message from PELL",
+        test_email
+    ).execute()

@@ -1,7 +1,6 @@
 
 from collections import OrderedDict
 from pell.assistant.text_to_speech import talk, listen, read
-import json
 import os
 import functools
 import operator
@@ -12,9 +11,7 @@ class ReadBookAction:
     def __init__(self, command, book=None):
         self.command = command
         self.book = book
-        with open('config.json') as f:
-            data = json.load(f)
-            self.books_dir = data["books_dir"]
+        self.books_dir = os.getenv("books_dir")
         
     def execute(self):
         if self.book == None:

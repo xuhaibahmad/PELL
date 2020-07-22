@@ -155,7 +155,7 @@ bin/
 audio.mp3
 speech.mp3
 
-config.json
+.env
 secrets/
 
 .vscode
